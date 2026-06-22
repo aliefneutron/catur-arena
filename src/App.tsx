@@ -213,6 +213,7 @@ export default function App() {
     const tourneyId = 'tourney_' + Math.random().toString(36).substr(2, 9);
     const newTourneyDoc = doc(db, 'tournaments', tourneyId);
     
+    let rootCreated = false;
     try {
       await setDoc(newTourneyDoc, {
         id: tourneyId,
@@ -227,27 +228,30 @@ export default function App() {
         regStartDate: regStartDate || '',
         regEndDate: regEndDate || '',
       });
+      rootCreated = true;
 
       // Write selected players from lobby pool into the subcollection
-      const batch = writeBatch(db);
-      selectedPlayerIds.forEach((pId) => {
-        const found = globalPlayers.find(gp => gp.id === pId);
-        if (found) {
-          const subPlayerDoc = doc(db, 'tournaments', tourneyId, 'players', pId);
-          batch.set(subPlayerDoc, {
-            id: pId,
-            name: found.name,
-            rating: found.rating,
-            score: 0,
-            tiebreaks: 0,
-            opponentIds: [],
-            colorHistory: [],
-            active: true,
-            byes: 0,
-          });
-        }
-      });
-      await batch.commit();
+      if (selectedPlayerIds.length > 0) {
+        const batch = writeBatch(db);
+        selectedPlayerIds.forEach((pId) => {
+          const found = globalPlayers.find(gp => gp.id === pId);
+          if (found) {
+            const subPlayerDoc = doc(db, 'tournaments', tourneyId, 'players', pId);
+            batch.set(subPlayerDoc, {
+              id: pId,
+              name: found.name,
+              rating: found.rating,
+              score: 0,
+              tiebreaks: 0,
+              opponentIds: [],
+              colorHistory: [],
+              active: true,
+              byes: 0,
+            });
+          }
+        });
+        await batch.commit();
+      }
 
       // Create initial notification log
       const notifRef = doc(collection(db, 'tournaments', tourneyId, 'notifications'));
@@ -260,11 +264,16 @@ export default function App() {
       });
 
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `tournaments/${tourneyId}`);
+      console.error('Error creating tournament sub-collections:', err);
+      if (!rootCreated) {
+        handleFirestoreError(err, OperationType.WRITE, `tournaments/${tourneyId}`);
+      }
+    } finally {
+      if (rootCreated) {
+        setIsCreateOpen(false);
+        setSelectedTournamentId(tourneyId);
+      }
     }
-
-    setIsCreateOpen(false);
-    setSelectedTournamentId(tourneyId);
   };
 
   // Deletion Handler
