@@ -12,6 +12,7 @@ import {
   orderBy,
   limit,
   deleteDoc,
+  runTransaction,
 } from 'firebase/firestore';
 import {
   Users,
@@ -782,18 +783,25 @@ export default function TournamentDetail({
                   setIsFinishing(true);
                   try {
                     const tournamentRef = doc(db, 'tournaments', tournamentId);
-                    await updateDoc(tournamentRef, {
-                      status: 'completed',
+                    const notifRef = doc(collection(db, 'tournaments', tournamentId, 'notifications'));
+
+                    const transactionPromise = runTransaction(db, async (transaction) => {
+                      transaction.update(tournamentRef, { status: 'completed' });
+                      transaction.set(notifRef, {
+                        id: notifRef.id,
+                        title: '🏆 TURNAMEN SELESAI!',
+                        message: `Seluruh ronde pertandingan telah selesai diselenggarakan. Buka Tab Klasemen untuk menyimak pemenang podium utama!`,
+                        type: 'info',
+                        createdAt: new Date().toISOString(),
+                      });
                     });
 
-                    const notifRef = doc(collection(db, 'tournaments', tournamentId, 'notifications'));
-                    await setDoc(notifRef, {
-                      id: notifRef.id,
-                      title: '🏆 TURNAMEN SELESAI!',
-                      message: `Seluruh ronde pertandingan telah selesai diselenggarakan. Buka Tab Klasemen untuk menyimak pemenang podium utama!`,
-                      type: 'info',
-                      createdAt: new Date().toISOString(),
-                    });
+                    // Tambahkan pengaman timeout maksimal 10 detik agar tidak stuck loading selamanya
+                    const timeoutPromise = new Promise((_, reject) => 
+                      setTimeout(() => reject(new Error("Koneksi ke server lambat/terputus. Pastikan internet Anda stabil.")), 10000)
+                    );
+
+                    await Promise.race([transactionPromise, timeoutPromise]);
 
                     setShowFinishConfirm(false);
                     setActiveTab('leaderboard');
