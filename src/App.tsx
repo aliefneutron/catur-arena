@@ -592,7 +592,9 @@ export default function App() {
                               <span>
                                 {t.status === 'registration'
                                   ? 'Menunggu registrasi pemain'
-                                  : `Selesai Babak ${t.currentRound} ${t.system === 'swiss' ? `dari ${t.totalRounds}` : ''}`}
+                                  : t.status === 'completed'
+                                  ? `Telah Berakhir di Babak ${t.currentRound}`
+                                  : `Ronde Aktif: Babak ${t.currentRound} ${t.system === 'swiss' ? `dari ${t.totalRounds}` : ''}`}
                               </span>
                             </div>
                           </div>

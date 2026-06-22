@@ -1103,6 +1103,7 @@ export default function TournamentDetail({
               isAdmin={isAdmin && tournament.status !== 'completed'}
               currentRound={tournament.currentRound}
               system={tournament.system}
+              tournamentStatus={tournament.status}
             />
           )}
 

@@ -9,6 +9,7 @@ interface ActiveMatchesProps {
   isAdmin: boolean;
   currentRound: number;
   system?: 'swiss' | 'knockout';
+  tournamentStatus?: 'registration' | 'active' | 'completed';
 }
 
 export default function ActiveMatches({
@@ -18,15 +19,17 @@ export default function ActiveMatches({
   isAdmin,
   currentRound,
   system = 'swiss',
+  tournamentStatus = 'active',
 }: ActiveMatchesProps) {
   
   const [selectedRound, setSelectedRound] = useState<number>(currentRound);
 
+  // Only initialize selectedRound on initial mount or if currentRound increases.
   useEffect(() => {
-    if (matches.some(m => m.round === currentRound)) {
+    if (currentRound > selectedRound) {
       setSelectedRound(currentRound);
     }
-  }, [currentRound, matches]);
+  }, [currentRound]);
 
   const getResultBadge = (result: MatchResult) => {
     switch (result) {
@@ -53,7 +56,7 @@ export default function ActiveMatches({
     .filter((m) => m.round === activeRound)
     .sort((a, b) => a.tableNumber - b.tableNumber);
 
-  const isRoundActive = activeRound === currentRound;
+  const isRoundActive = activeRound === currentRound && tournamentStatus !== 'completed';
 
   return (
     <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-4 md:p-6 shadow-2xl flex flex-col h-[650px]" id="matches-card">
