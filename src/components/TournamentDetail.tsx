@@ -1097,7 +1097,7 @@ export default function TournamentDetail({
         <div className="lg:col-span-2 space-y-6">
           {activeTab === 'matches' && (
             <ActiveMatches
-              matches={activeRoundMatches}
+              matches={matches}
               onRecordResult={handleRecordMatchResult}
               onClearResult={handleClearMatchResult}
               isAdmin={isAdmin && tournament.status !== 'completed'}
