@@ -1,0 +1,227 @@
+{
+  "entities": {
+    "Tournament": {
+      "title": "Tournament",
+      "description": "Represents a chess tournament.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the tournament"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the tournament"
+        },
+        "gameType": {
+          "type": "string",
+          "enum": ["Blitz", "Rapid", "Classical"],
+          "description": "Type of games played (e.g. Blitz, Rapid, Classical)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["registration", "active", "completed"],
+          "description": "Current phase of the tournament"
+        },
+        "currentRound": {
+          "type": "integer",
+          "description": "The current round number starting from 1"
+        },
+        "totalRounds": {
+          "type": "integer",
+          "description": "Total number of tournament rounds"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the tournament was created"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Auth UID of the tournament creator/admin"
+        },
+        "regStartDate": {
+          "type": "string",
+          "description": "Optional start date for player signup registration (YYYY-MM-DD)"
+        },
+        "regEndDate": {
+          "type": "string",
+          "description": "Optional end date/deadline for player signup registration (YYYY-MM-DD)"
+        }
+      },
+      "required": ["id", "name", "gameType", "status", "currentRound", "totalRounds", "createdAt", "createdBy"]
+    },
+    "Player": {
+      "title": "Player",
+      "description": "A player registered in a specific tournament.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Primary identifier for the player (can be guest ID or auth ID)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the player"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Chess rating (e.g., FIDE elo or estimated)"
+        },
+        "score": {
+          "type": "number",
+          "description": "Current cumulative tournament score"
+        },
+        "tiebreaks": {
+          "type": "number",
+          "description": "Secondary scoring (e.g. Buchholz/Sonneborn-Berger)"
+        },
+        "opponentIds": {
+          "type": "array",
+          "description": "Array of opponent player IDs previously faced to prevent duplicates"
+        },
+        "colorHistory": {
+          "type": "array",
+          "description": "Array of colors played for Swiss system color balancing (e.g., ['white', 'black', 'white'])"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the player is still active in the tournament"
+        },
+        "byes": {
+          "type": "integer",
+          "description": "Count of empty-round byes awarded to the player"
+        }
+      },
+      "required": ["id", "name", "rating", "score", "tiebreaks", "opponentIds", "colorHistory", "active", "byes"]
+    },
+    "Match": {
+      "title": "Match",
+      "description": "A pairing of two players in a specific round of a tournament.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique key matching {tournamentId}_{round}_{tableNumber}"
+        },
+        "round": {
+          "type": "integer",
+          "description": "Round number"
+        },
+        "tableNumber": {
+          "type": "integer",
+          "description": "Assigned board/table number"
+        },
+        "whitePlayerId": {
+          "type": "string",
+          "description": "ID of the player playing White (could be 'BYE' or empty if single player bye)"
+        },
+        "whitePlayerName": {
+          "type": "string",
+          "description": "Name of the White player"
+        },
+        "blackPlayerId": {
+          "type": "string",
+          "description": "ID of the player playing Black"
+        },
+        "blackPlayerName": {
+          "type": "string",
+          "description": "Name of the Black player"
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pending", "1-0", "0-1", "0.5-0.5", "1-0F", "0-1F"],
+          "description": "Tournament results: White wins (1-0), Black wins (0-1), Draw (0.5-0.5), or Forfeits"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when pairing was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when score was registered"
+        }
+      },
+      "required": ["id", "round", "tableNumber", "whitePlayerId", "whitePlayerName", "blackPlayerId", "blackPlayerName", "result", "createdAt", "updatedAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Real-time updates regarding tournament events, pairings, or results.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique notification ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Headline of the notice"
+        },
+        "message": {
+          "type": "string",
+          "description": "Descriptive message/story on results or status upgrades"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["match_result", "round_started", "info"],
+          "description": "Type categorization for styled rendering or sound notifications"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Publication timestamp"
+        }
+      },
+      "required": ["id", "title", "message", "type", "createdAt"]
+    },
+    "GlobalPlayer": {
+      "title": "GlobalPlayer",
+      "description": "A player in the master pool of registrations",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique player ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the player"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Chess rating of the player"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Registration time"
+        }
+      },
+      "required": ["id", "name", "rating", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/players/{playerId}": {
+      "schema": "GlobalPlayer",
+      "description": "Master registered player pool"
+    },
+    "/tournaments/{tournamentId}": {
+      "schema": "Tournament",
+      "description": "Tournament state documents"
+    },
+    "/tournaments/{tournamentId}/players/{playerId}": {
+      "schema": "Player",
+      "description": "Players assigned to a specific tournament"
+    },
+    "/tournaments/{tournamentId}/matches/{matchId}": {
+      "schema": "Match",
+      "description": "Swiss pairing match records for each round"
+    },
+    "/tournaments/{tournamentId}/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Real-time notices and match result announcements"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Turnamen Catur Swiss",
+  "description": "Sistem turnamen catur real-time dengan algoritma pairing Swiss otomatis, leaderboard klasemen dinamis, dan notifikasi hasil tanding instan terintegrasi dengan Firebase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
