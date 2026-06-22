@@ -143,6 +143,7 @@ export default function TournamentDetail({
   // Custom Modals / Overlays/ Banners instead of blocking window.confirm / window.alert
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const [alertBanner, setAlertBanner] = useState<{ type: 'error' | 'success' | 'info' | 'warning'; message: string } | null>(null);
 
   const triggerAlert = (message: string, type: 'error' | 'success' | 'info' | 'warning' = 'error') => {
@@ -771,13 +772,14 @@ export default function TournamentDetail({
             <div className="flex justify-end gap-3 border-t border-white/5 pt-4">
               <button
                 onClick={() => setShowFinishConfirm(false)}
-                className="px-4 py-2 bg-white/5 border border-white/10 text-slate-350 hover:bg-white/10 hover:text-white rounded-xl text-xs transition-all cursor-pointer font-sans"
+                disabled={isFinishing}
+                className="px-4 py-2 bg-white/5 border border-white/10 text-slate-350 hover:bg-white/10 hover:text-white rounded-xl text-xs transition-all cursor-pointer font-sans disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Batal
               </button>
               <button
                 onClick={async () => {
-                  setShowFinishConfirm(false);
+                  setIsFinishing(true);
                   try {
                     const tournamentRef = doc(db, 'tournaments', tournamentId);
                     await updateDoc(tournamentRef, {
@@ -793,15 +795,20 @@ export default function TournamentDetail({
                       createdAt: new Date().toISOString(),
                     });
 
+                    setShowFinishConfirm(false);
                     setActiveTab('leaderboard');
                     triggerAlert('Turnamen berhasil diselesaikan dan dikunci!', 'success');
                   } catch (err: any) {
                     triggerAlert(`Gagal menyelesaikan turnamen: ${err?.message || err}`);
+                  } finally {
+                    setIsFinishing(false);
                   }
                 }}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-emerald-600/15 font-sans"
+                disabled={isFinishing}
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-emerald-600/15 font-sans disabled:opacity-50 disabled:cursor-wait flex items-center gap-2"
               >
-                Selesaikan Sekarang
+                {isFinishing && <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />}
+                {isFinishing ? 'Menyelesaikan...' : 'Selesaikan Sekarang'}
               </button>
             </div>
           </div>
