@@ -94,6 +94,16 @@ export default function TournamentDetail({
   
   // Tabs
   const [activeTab, setActiveTab] = useState<'matches' | 'leaderboard' | 'players' | 'notifications'>('matches');
+  const [initialTabSet, setInitialTabSet] = useState(false);
+
+  useEffect(() => {
+    if (tournament && !initialTabSet) {
+      if (tournament.status === 'completed') {
+        setActiveTab('leaderboard');
+      }
+      setInitialTabSet(true);
+    }
+  }, [tournament, initialTabSet]);
   
   // Registration States
   const [newPlayerName, setNewPlayerName] = useState('');
@@ -1092,7 +1102,7 @@ export default function TournamentDetail({
               matches={activeRoundMatches}
               onRecordResult={handleRecordMatchResult}
               onClearResult={handleClearMatchResult}
-              isAdmin={isAdmin}
+              isAdmin={isAdmin && tournament.status !== 'completed'}
               currentRound={tournament.currentRound}
               system={tournament.system}
             />
@@ -1135,7 +1145,7 @@ export default function TournamentDetail({
                   </div>
                 </div>
 
-                {isAdmin && (
+                {isAdmin && tournament.status !== 'completed' && (
                   <button
                     onClick={() => setIsEditingDates(!isEditingDates)}
                     className="w-full md:w-auto px-4 py-2 hover:bg-white/10 bg-white/5 text-slate-200 border border-white/10 rounded-xl text-xs font-semibold hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 font-sans"
@@ -1146,7 +1156,7 @@ export default function TournamentDetail({
               </div>
 
               {/* Date Editing Form (Admin Only) */}
-              {isAdmin && isEditingDates && (
+              {isAdmin && tournament.status !== 'completed' && isEditingDates && (
                 <div className="mb-6 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/15 font-sans space-y-4">
                   <h5 className="text-xs font-bold text-indigo-300 uppercase tracking-wider font-mono">
                     Ubah Batas Waktu Pendaftaran
@@ -1380,7 +1390,7 @@ export default function TournamentDetail({
                       <th className="py-2.5 px-4 font-bold">Nama</th>
                       <th className="py-2.5 px-4 text-center font-bold">Rating</th>
                       <th className="py-2.5 px-4 text-center font-bold">Keaktifan</th>
-                      {isAdmin && <th className="py-2.5 px-4 text-right font-bold">Kelola</th>}
+                      {isAdmin && tournament.status !== 'completed' && <th className="py-2.5 px-4 text-right font-bold">Kelola</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-sans text-sm">
@@ -1435,7 +1445,7 @@ export default function TournamentDetail({
                               </span>
                             )}
                           </td>
-                          {isAdmin && (
+                          {isAdmin && tournament.status !== 'completed' && (
                             <td className="py-3 px-4 text-right">
                               {tournament.status === 'registration' ? (
                                 <button
