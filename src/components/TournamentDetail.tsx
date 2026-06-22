@@ -94,16 +94,14 @@ export default function TournamentDetail({
   
   // Tabs
   const [activeTab, setActiveTab] = useState<'matches' | 'leaderboard' | 'players' | 'notifications'>('matches');
-  const [initialTabSet, setInitialTabSet] = useState(false);
+  const [hasForcedLeaderboard, setHasForcedLeaderboard] = useState(false);
 
   useEffect(() => {
-    if (tournament && !initialTabSet) {
-      if (tournament.status === 'completed') {
-        setActiveTab('leaderboard');
-      }
-      setInitialTabSet(true);
+    if (tournament?.status === 'completed' && !hasForcedLeaderboard) {
+      setActiveTab('leaderboard');
+      setHasForcedLeaderboard(true);
     }
-  }, [tournament, initialTabSet]);
+  }, [tournament?.status, hasForcedLeaderboard]);
   
   // Registration States
   const [newPlayerName, setNewPlayerName] = useState('');
